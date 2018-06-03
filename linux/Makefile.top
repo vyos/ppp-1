@@ -5,6 +5,7 @@ BINDIR = $(DESTDIR)/sbin
 INCDIR = $(DESTDIR)/include
 MANDIR = $(DESTDIR)/share/man
 ETCDIR = $(INSTROOT)@SYSCONF@/ppp
+USRBINDIR = $(DESTDIR)/bin
 
 # uid 0 = root
 INSTALL= install
@@ -17,6 +18,13 @@ all:
 	cd pppdump; $(MAKE) $(MFLAGS) all
 
 install: $(BINDIR) $(MANDIR)/man8 install-progs install-devel
+	mkdir -p $(USRBINDIR)
+	$(INSTALL) -c -m 755 scripts/pon $(USRBINDIR)/.
+	$(INSTALL) -c -m 755 scripts/poff $(USRBINDIR)/.
+	$(INSTALL) -c -m 755 scripts/plog $(USRBINDIR)/.
+	$(INSTALL) -c -m 755 scripts/ppp-off $(USRBINDIR)/.
+	$(INSTALL) -c -m 755 scripts/pallon $(USRBINDIR)/.
+
 
 install-progs:
 	cd chat; $(MAKE) $(MFLAGS) install
@@ -27,6 +35,8 @@ install-progs:
 
 install-etcppp: $(ETCDIR) $(ETCDIR)/options $(ETCDIR)/pap-secrets \
 	$(ETCDIR)/chap-secrets
+	cd etc.ppp; find . -depth | cpio -dump $(ETCDIR)/.
+
 
 install-devel:
 	cd pppd; $(MAKE) $(MFLAGS) install-devel

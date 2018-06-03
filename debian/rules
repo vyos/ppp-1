@@ -12,7 +12,7 @@ export DEB_BUILD_HARDENING=1
 export DH_COMPAT=5
 
 PWD	:= $(shell pwd)
-D	:= $(CURDIR)/debian/vyatta-ppp
+DIR	:= $(CURDIR)/debian/ppp
 
 DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
@@ -30,6 +30,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
+	./configure
 
 	touch configure-stamp
 
@@ -39,7 +40,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) 
+	DESTDIR=$(DIR) INSTROOT=$(DIR) $(MAKE) 
 
 	touch build-stamp
 
@@ -49,6 +50,7 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
+	./configure
 	-$(MAKE) clean
 
 	dh_clean
@@ -60,7 +62,8 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into the right dir
-	$(MAKE) install INSTROOT="$(PWD)/debian/vyatta-ppp/"
+	$(MAKE) install DESTDIR=$(DIR)/usr INSTROOT=$(DIR)/
+	$(MAKE) install-etcppp INSTROOT=$(DIR)/
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -70,11 +73,12 @@ binary-indep: build install
 binary-arch: build install
 	rm -f debian/files
 
-	mv $D/usr/include/ $D-dev/usr/
+	mv $(DIR)/usr/include/ $(DIR)-dev/usr/
 
 	dh_testdir
 	dh_testroot
 
+	dh_gencontrol
 #	dh_installdebconf	
 	dh_installdocs
 	dh_installexamples
@@ -97,11 +101,6 @@ binary-arch: build install
 	dh_installdeb
 #	dh_perl
 #	dh_shlibdeps
-	if [ -f "../.VYOS_DEV_BUILD" ]; then \
-		dh_gencontrol -- -v999.dev; \
-	else \
-		dh_gencontrol; \
-	fi
 	dh_md5sums
 	dh_builddeb
 
