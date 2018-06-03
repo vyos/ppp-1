@@ -59,6 +59,7 @@ case $FLAG in
  "?") exit 1;
 esac
 
+XXX="$1"
 # Get the PIDs of all the pppds running.  Could also get these from
 # /var/run, but pppd doesn't create .pid files until ppp is up.
 PIDS=`pidof pppd`
@@ -87,11 +88,27 @@ if test "$#" -eq 0 -o "$MODE" = "all" ; then
         echo "$0: $KILL failed.  None ${DONE}."
         exit 1
     }
+
+    [ "$SIG" != TERM ] && exit 0
+
+    i=0
+    while pidof pppd >/dev/null
+    do
+	sleep 1
+	[ $i -gt 30 ] && exit 1
+	i=`expr $i + 1`
+    done
+
     exit 0
 fi
 
 # There is an argument, so kill the pppd started on that provider.
-PID=`ps axw | grep "[ /]pppd call $1" | awk '{print $1}'`
+get_pid()
+{
+	PID=`ps axw | grep "\<pppd .*call $1 *\$" | awk '{print $1}'`
+}
+
+get_pid "$1"
 if test -n "$PID" ; then
     $KILL -$SIG $PID || {
         echo "$0: $KILL failed.  None ${DONE}."
@@ -101,4 +118,17 @@ else
    echo "$0: I could not find a pppd process for provider '$1'. None ${DONE}."
    exit 1
 fi
+
+[ "$SIG" != TERM ] && exit 0
+
+i=0
+while true
+do
+    get_pid $1
+    [ ! "$PID" ] && exit 0
+    sleep 1
+    [ $i -gt 30 ] && exit 1
+    i=`expr $i + 1`
+done
+
 exit 0
