@@ -1,0 +1,5 @@
+ppp (2.4.7+vyos2) UNRELEASED; urgency=medium
+
+  * Import version 2.4.7 from upstream.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 03 Jun 2018 08:50:49 +0200
