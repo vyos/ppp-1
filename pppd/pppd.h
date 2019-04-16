@@ -665,7 +665,11 @@ int  sif6addr __P((int, eui64_t, eui64_t));
 int  cif6addr __P((int, eui64_t, eui64_t));
 				/* Remove an IPv6 address from i/f */
 #endif
+#ifndef __linux__
 int  sifdefaultroute __P((int, u_int32_t, u_int32_t));
+#else
+int  sifdefaultroute __P((int, u_int32_t, u_int32_t, bool replace_default_rt));
+#endif
 				/* Create default route through i/f */
 int  cifdefaultroute __P((int, u_int32_t, u_int32_t));
 				/* Delete default route through i/f */
