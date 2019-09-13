@@ -15,23 +15,12 @@ case "$device"X in
     Invalid interface $device to update resolv.conf on link down
     exit 0;;
 esac
-
-# remove nameservers in /etc/ppp/resolv-$device.conf from /etc/resolv.conf
-# and then delete /etc/ppp/resolv-$device.conf file
-nameserver_array=($( grep '^nameserver' /etc/ppp/resolv-$device.conf | awk '{print $2}' ))
-ns_array_len=${#nameserver_array[*]}
-i=0
-while [ $i -lt $ns_array_len ]; do
- sed -i "/${nameserver_array[$i]}[[:space:]].*$device$/d" /etc/resolv.conf
- let i++
-done
 rm -f /etc/ppp/resolv-$device.conf
+vyos-hostsd-client --delete-name-servers --tag $device
 
-# restart dnsmasq and ntp here just as is done in /opt/vyatta/sbin/vyatta-system-nameservers
-
-# restart dnsmasq if dns-forwarding is configured
+# restart the DNS server if dns-forwarding is configured
 if cli-shell-api existsActive service dns forwarding; then
-   /opt/vyatta/sbin/vyatta-dns-forwarding.pl --update-dnsforwarding --outside-cli >&/dev/null
+  systemctl restart pdns-recursor
 fi
 
 # restart ntp if ntp is configured
@@ -40,3 +29,4 @@ if [ -f /etc/ntp.conf ] && grep -q "^server" /etc/ntp.conf; then
 fi
 
 exit 0
+
