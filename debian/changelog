@@ -1,3 +1,10 @@
+ppp (2.4.7+vyos3-2.1) UNRELEASED; urgency=medium
+
+  * Fix PPPoE defaultroute option.
+  * Update if-up script for vyos-hostsd.
+
+ -- Daniil Baturin <daniil@vyos.io>  Tue, 28 Jan 2020 22:27:32 +0100
+
 ppp (2.4.7+vyos2-2) unstable; urgency=medium
 
   * Script updates for T1598
